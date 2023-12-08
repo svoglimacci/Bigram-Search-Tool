@@ -1,64 +1,58 @@
 package org.example;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class DocumentFinder {
 
-  private final CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap;
+    private final List<Pair<String, String[]>> dataset;
+    private final CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap;
 
-  private final List<Pair<String, String[]>> dataset;
+    public DocumentFinder(List<Pair<String, String[]>> dataset,
+                          CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
+        this.dataset = dataset;
+        this.wordMap = wordMap;
+    }
 
-  public DocumentFinder(List<Pair<String, String[]>> dataset,
-      CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
-    this.dataset = dataset;
-    this.wordMap = wordMap;
-  }
-
-  String findMostRelevantDocument(String word) {
-    List<Pair<Pair<String, Integer>, Integer>> results = new ArrayList<>();
+    String findMostRelevantDocument(String word) {
+    Map<String, Integer> results = new HashMap<>();
 
     CustomHashMap<List<String>, List<Integer>> fileMap = wordMap.get(word);
-
     if (fileMap == null) {
-      System.out.println("No such word in the dataset");
-      return null;
+        System.err.println("No such word in the dataset");
+        return null;
     }
 
     for (List<String> key : fileMap.keySet()) {
-      int count = fileMap.get(key).size();
-      String fileName = key.get(0);
-      int totalWords = Objects.requireNonNull(
-          dataset.stream().filter(result -> result.first.equals(fileName)).findFirst()
-              .orElse(null)).second.length;
+        int count = fileMap.get(key).size();
+        String fileName = key.get(0);
 
-      if (results.stream().anyMatch(result -> result.first.first.equals(fileName))) {
-        results.stream().filter(r -> r.first.first.equals(fileName)).findFirst()
-            .ifPresent(result -> result.second += count);
-      } else {
-        results.add(new Pair<>(new Pair<>(fileName, totalWords), count));
-      }
+        results.merge(fileName, count, Integer::sum);
     }
 
+    List<Pair<String, Double>> scores = calculateScores(results);
+
+    return scores.stream()
+            .max(Comparator.comparing(Pair::getValue))
+            .map(Pair::getKey)
+            .orElse(null);
+}
+
+    private List<Pair<String, Double>> calculateScores(Map<String, Integer> results) {
     List<Pair<String, Double>> scores = new ArrayList<>();
 
-    for (Pair<Pair<String, Integer>, Integer> result : results) {
+    for (Map.Entry<String, Integer> result : results.entrySet()) {
+        double TF = (double) result.getValue() / dataset.stream()
+                .filter(pair -> pair.getKey().equals(result.getKey()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No matching file found"))
+                .getValue().length;
 
-      double TF = (double) result.second / result.first.second;
+        double IDF = 1 + Math.log((double) (1 + dataset.size()) / (1 + results.size()));
 
-      double IDF = 1 + Math.log((double) (1 + dataset.size()) / (1 + results.size()));
+        double TFIDF = TF * IDF;
 
-      double TFIDF = TF * IDF;
-
-      scores.add(new Pair<>(result.first.first, TFIDF));
+        scores.add(new Pair<>(result.getKey(), TFIDF));
     }
 
-    scores.sort(Comparator.comparingDouble(o -> o.second));
-    scores.sort(Comparator.comparing(o -> o.first));
-
-    return scores.get(scores.size() - 1).first;
-  }
-
+    return scores;
+}
 }

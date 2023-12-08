@@ -36,3 +36,9 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+dataset
+dataset/*
+query.txt
+solution.txt
+stanford-corenlp-*/

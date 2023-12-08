@@ -1,13 +1,21 @@
 package org.example;
 
 //custom Pair class
-public class Pair<T, U> {
+public final class Pair<K, V> {
 
-  public final T first;
-  public U second;
+  private final K key;
+  private final V value;
 
-  public Pair(T first, U second) {
-    this.first = first;
-    this.second = second;
+  public Pair(K key, V value) {
+    this.key = key;
+    this.value = value;
+  }
+
+  public K getKey() {
+    return key;
+  }
+
+  public V getValue() {
+    return value;
   }
 }

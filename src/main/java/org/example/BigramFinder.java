@@ -1,64 +1,68 @@
 package org.example;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class BigramFinder {
 
-  private final List<Pair<String, String[]>> dataset;
+    private final List<Pair<String, String[]>> dataset;
+    private final CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap;
 
-  private final CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap;
-
-  public BigramFinder(List<Pair<String, String[]>> dataset,
-      CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
-    this.dataset = dataset;
-    this.wordMap = wordMap;
-  }
-
-  String findMostProbableBigram(String word) {
-
-    String mostProbableWord;
-    CustomHashMap<List<String>, List<Integer>> fileMap = wordMap.get(word);
-    if (fileMap == null) {
-      System.out.println("No such word in the dataset");
-      return null;
+    public BigramFinder(List<Pair<String, String[]>> dataset,
+                        CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
+        this.dataset = dataset;
+        this.wordMap = wordMap;
     }
 
-    List<String> followingWords = new ArrayList<>();
-
-    for (List<String> key : fileMap.keySet()) {
-      List<Integer> positions = fileMap.get(key);
-      for (Integer position : positions) {
-        String fileName = key.get(0);
-        Pair<String, String[]> result = dataset.stream().filter(file -> file.first.equals(fileName))
-            .findFirst().orElse(null);
-
-        if (result != null) {
-          String[] words = result.second;
-          if (position + 1 < words.length) {
-            followingWords.add(words[position + 1]);
-          }
+    String findMostProbableBigram(String word) {
+        CustomHashMap<List<String>, List<Integer>> fileMap = wordMap.get(word);
+        if (fileMap == null) {
+            System.err.println("No such word in the dataset");
+            return null;
         }
-      }
+
+        List<String> followingWords = findFollowingWords(fileMap);
+
+        return findMostProbableWord(followingWords);
     }
 
-    Map<String, Integer> wordCount = followingWords.stream()
-        .collect(Collectors.groupingBy(e -> e, Collectors.summingInt(e -> 1)));
+    private List<String> findFollowingWords(CustomHashMap<List<String>, List<Integer>> fileMap) {
+        List<String> followingWords = new ArrayList<>();
 
-    if (!wordCount.isEmpty()) {
-      int max = wordCount.values().stream().max(Comparator.naturalOrder()).orElse(0);
+        for (List<String> key : fileMap.keySet()) {
+            List<Integer> positions = fileMap.get(key);
+            for (Integer position : positions) {
+                String fileName = key.get(0);
+                Pair<String, String[]> result = dataset.stream()
+                        .filter(file -> file.getKey().equals(fileName))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("No matching file found"));
 
-      mostProbableWord = wordCount.entrySet().stream().filter(e -> e.getValue() == max).sorted()
-          .map(Map.Entry::getKey).findFirst().orElse(null);
+                String[] words = result.getValue();
+                if (position + 1 < words.length) {
+                    followingWords.add(words[position + 1]);
+                }
+            }
+        }
 
-    } else {
-      return null;
+        return followingWords;
     }
 
-    return mostProbableWord;
+    private String findMostProbableWord(List<String> followingWords) {
+        Map<String, Integer> wordCount = followingWords.stream()
+                .collect(Collectors.groupingBy(e -> e, Collectors.summingInt(e -> 1)));
 
-  }
+        if (!wordCount.isEmpty()) {
+            int max = wordCount.values().stream().max(Comparator.naturalOrder()).orElse(0);
+
+            return wordCount.entrySet().stream()
+                .filter(e -> e.getValue() == max)
+                .sorted(Map.Entry.comparingByKey())
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(null);
+        } else {
+            return null;
+        }
+    }
 }
