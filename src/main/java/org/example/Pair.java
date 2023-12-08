@@ -1,7 +1,7 @@
 package org.example;
 
 //custom Pair class
-class Pair<T, U> {
+public class Pair<T, U> {
 
   public final T first;
   public U second;

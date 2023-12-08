@@ -6,6 +6,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+// Hashmap implementation loosely based on the original Java HashMap implementation
+// https://github.com/openjdk/jdk/blob/master/src/java.base/share/classes/java/util/HashMap.java
+
 public class CustomHashMap<K, V> implements Map<K, V> {
 
   static final float DEFAULT_LOAD_FACTOR = 0.75f;

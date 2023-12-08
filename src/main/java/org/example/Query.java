@@ -5,6 +5,7 @@ public class Query {
 
   private final QueryType queryType;
   private final String word;
+
   public Query(QueryType queryType, String word) {
     this.queryType = queryType;
     this.word = word;

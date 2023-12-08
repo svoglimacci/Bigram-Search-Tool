@@ -3,9 +3,7 @@ package org.example;
 import static org.example.Query.QueryType;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -45,13 +43,13 @@ public class QueryProcessor {
     }
   }
 
-  void processQueries() {
+  public List<String> processQueries() {
     DocumentFinder documentFinder = new DocumentFinder(dataset, wordMap);
     BigramFinder bigramFinder = new BigramFinder(dataset, wordMap);
-    SpellChecker spellChecker = new SpellChecker(dataset, wordMap);
+    SpellChecker spellChecker = new SpellChecker(wordMap);
     List<Query> queries = new ArrayList<>();
     List<String> solutions = new ArrayList<>();
-    String solution = "";
+    String solution;
     try (BufferedReader reader = new BufferedReader(new FileReader(queryFile))) {
       String line;
 
@@ -69,20 +67,12 @@ public class QueryProcessor {
         case MOST_PROBABLE_BIGRAM -> word + " " + bigramFinder.findMostProbableBigram(word);
         case SEARCH -> documentFinder.findMostRelevantDocument(word);
       };
-      solutions.add(solution);
-    }
-
-    try {
-      BufferedWriter writer = new BufferedWriter(new FileWriter("solution.txt"));
-      for (String str : solutions) {
-
-        writer.write(str);
-        writer.newLine();
+      if (solution != null) {
+        solutions.add(solution);
       }
-      writer.close();
-    } catch (IOException e) {
-      e.printStackTrace();
     }
+
+    return solutions;
   }
 
 

@@ -6,11 +6,8 @@ public class SpellChecker {
 
   private final CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap;
 
-  private final List<Pair<String, String[]>> dataset;
 
-  public SpellChecker(List<Pair<String, String[]>> dataset,
-      CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
-    this.dataset = dataset;
+  public SpellChecker(CustomHashMap<String, CustomHashMap<List<String>, List<Integer>>> wordMap) {
     this.wordMap = wordMap;
   }
 
@@ -30,6 +27,9 @@ public class SpellChecker {
     return correctedWord;
   }
 
+
+  // Dynamic programming approach based on the Longest common subsequence algorithm
+  // https://en.wikipedia.org/wiki/Longest_common_subsequence
   public int findEditDistance(String word1, String word2) {
     int length1 = word1.length();
     int length2 = word2.length();

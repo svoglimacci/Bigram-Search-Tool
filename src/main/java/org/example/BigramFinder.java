@@ -49,13 +49,16 @@ public class BigramFinder {
         .collect(Collectors.groupingBy(e -> e, Collectors.summingInt(e -> 1)));
 
     if (!wordCount.isEmpty()) {
-      mostProbableWord = wordCount.keySet().stream().max(Comparator.comparingLong(wordCount::get))
-          .orElse(null);
+      int max = wordCount.values().stream().max(Comparator.naturalOrder()).orElse(0);
+
+      mostProbableWord = wordCount.entrySet().stream().filter(e -> e.getValue() == max).sorted()
+          .map(Map.Entry::getKey).findFirst().orElse(null);
+
     } else {
       return null;
     }
 
     return mostProbableWord;
-  }
 
+  }
 }

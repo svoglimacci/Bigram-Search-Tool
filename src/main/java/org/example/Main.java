@@ -1,5 +1,7 @@
 package org.example;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -12,11 +14,25 @@ public class Main {
 
     String queryFile = "query.txt";
 
+    String outputFile = "solution.txt";
+
     TextProcessor textPreprocessor = new TextProcessor();
     List<Pair<String, String[]>> results = textPreprocessor.processFiles(datasetDir);
     QueryProcessor queryProcessor = new QueryProcessor(results, queryFile);
 
-    queryProcessor.processQueries();
+    List<String> solutions = queryProcessor.processQueries();
+
+    try {
+      BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+      for (String str : solutions) {
+
+        writer.write(str);
+        writer.newLine();
+      }
+      writer.close();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
 
   }
