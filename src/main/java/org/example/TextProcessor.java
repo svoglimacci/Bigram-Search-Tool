@@ -12,9 +12,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * The TextProcessor class is responsible for preprocessing text files in such that all punctuations are replaced by a
+ * space and all multiple spaces by a single space. It is also responsible for NLF text processing each text file.
+ */
 public class TextProcessor {
 
-
+  /**
+   * The processFiles method processes all text files from a given directory.
+   *
+   * @param dir The directory path to the text files
+   * @return  List of processed files
+   * @throws IOException if an input/output error occurs during file processing
+   */
   public List<Pair<String, String[]>> processFiles(String dir) throws IOException {
 
     List<Pair<String, String[]>> results = new ArrayList<>();
@@ -22,11 +32,13 @@ public class TextProcessor {
 
     File[] listOfFiles = folder.listFiles();
 
+    // directory folder is empty
     if (listOfFiles == null || listOfFiles.length == 0) {
       System.out.println("No files found in the directory: " + dir);
       return results;
     }
 
+    // process each file
     for (File file : listOfFiles) {
       if (file.isFile()) {
         BufferedReader br;
