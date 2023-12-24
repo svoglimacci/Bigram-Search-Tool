@@ -161,13 +161,13 @@ public class CustomHashMap<K, V> implements Map<K, V> {
   }
 
   /**
-   * This method is not currently implemented.
-   *
-   * @throws UnsupportedOperationException if the method is called
+   * Returns a set of the keys contained in the CustomHashMap
+   * @return a set of keys
+   * @see KeySet
    */
   @Override
   public Set<K> keySet() {
-    throw new UnsupportedOperationException("Not implemented.");
+    return new KeySet();
   }
 
   /**
@@ -197,7 +197,7 @@ public class CustomHashMap<K, V> implements Map<K, V> {
    */
   @Override
   public boolean containsKey(Object key) {
-    throw new UnsupportedOperationException("Not implemented.");
+    return get(key) != null;
   }
 
   /**
